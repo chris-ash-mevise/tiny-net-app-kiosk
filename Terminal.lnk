@@ -1,0 +1,11 @@
+table Icon
+  Caption: Terminal
+  Command: xterm -fa Monospace -fs 11 -bg black -fg white
+  Icon: /home/kioskuser/.idesktop/icons/terminal-icon.png
+  X: 50
+  Y: 120
+  Width: 48
+  Height: 48
+  Transparency: 50
+  ClickDelay: 200
+end

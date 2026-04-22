@@ -3,5 +3,8 @@ xset s off
 xset -dpms
 xset s noblank
 
+# Desktop icon renderer — must start before the app
+idesk &
+
 # Launch the kiosk app; session ends when the window closes
 mono ~/HelloWorld.exe

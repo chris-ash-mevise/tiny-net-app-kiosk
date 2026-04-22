@@ -1,0 +1,11 @@
+table Icon
+  Caption: Hello World
+  Command: mono ~/HelloWorld.exe
+  Icon: /home/kioskuser/.idesktop/icons/kiosk-icon.png
+  X: 50
+  Y: 50
+  Width: 48
+  Height: 48
+  Transparency: 50
+  ClickDelay: 200
+end
