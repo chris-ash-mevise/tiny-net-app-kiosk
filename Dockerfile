@@ -54,8 +54,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         # Desktop icon renderer
         idesk \
         \
-        # Lightweight terminal for running top etc.
+        # Lightweight terminal + process monitor
         xterm \
+        procps \
     && rm -rf /var/lib/apt/lists/*
 
 # ─── Kiosk user (password set at runtime by entrypoint) ──────────────────────
