@@ -77,38 +77,37 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN useradd -m -s /bin/bash "${KIOSK_USER}" \
     && usermod -aG ssl-cert "${KIOSK_USER}"
 
-# ─── Copy compiled binary and icons from build stage ─────────────────────────
+# Build home directory contents into a seed path. The volume mounts over
+# /home/$USER making it empty on first run; entrypoint.sh copies missing
+# files from here so they appear on the volume without overwriting user files.
 COPY --from=build --chown=${KIOSK_USER}:${KIOSK_USER} /build/HelloWorld.exe \
-     /home/${KIOSK_USER}/HelloWorld.exe
-RUN chmod 0755 "/home/${KIOSK_USER}/HelloWorld.exe"
+     /home/${KIOSK_USER}-seed/HelloWorld.exe
+RUN chmod 0755 "/home/${KIOSK_USER}-seed/HelloWorld.exe"
 
-RUN mkdir -p "/home/${KIOSK_USER}/.idesktop/icons"
+RUN mkdir -p "/home/${KIOSK_USER}-seed/.idesktop/icons"
 COPY --from=build /build/kiosk-icon.png \
-     /home/${KIOSK_USER}/.idesktop/icons/kiosk-icon.png
+     /home/${KIOSK_USER}-seed/.idesktop/icons/kiosk-icon.png
 COPY --from=build /build/terminal-icon.png \
-     /home/${KIOSK_USER}/.idesktop/icons/terminal-icon.png
+     /home/${KIOSK_USER}-seed/.idesktop/icons/terminal-icon.png
 COPY --from=build /build/dosbox-icon.png \
-     /home/${KIOSK_USER}/.idesktop/icons/dosbox-icon.png
+     /home/${KIOSK_USER}-seed/.idesktop/icons/dosbox-icon.png
 
-# ─── iDesk icon configs ───────────────────────────────────────────────────────
 COPY --chown=${KIOSK_USER}:${KIOSK_USER} HelloWorld.lnk \
-     /home/${KIOSK_USER}/.idesktop/HelloWorld.lnk
+     /home/${KIOSK_USER}-seed/.idesktop/HelloWorld.lnk
 COPY --chown=${KIOSK_USER}:${KIOSK_USER} Terminal.lnk \
-     /home/${KIOSK_USER}/.idesktop/Terminal.lnk
+     /home/${KIOSK_USER}-seed/.idesktop/Terminal.lnk
 COPY --chown=${KIOSK_USER}:${KIOSK_USER} DOSBox.lnk \
-     /home/${KIOSK_USER}/.idesktop/DOSBox.lnk
-RUN chown -R "${KIOSK_USER}:${KIOSK_USER}" "/home/${KIOSK_USER}/.idesktop"
+     /home/${KIOSK_USER}-seed/.idesktop/DOSBox.lnk
+RUN chown -R "${KIOSK_USER}:${KIOSK_USER}" "/home/${KIOSK_USER}-seed/.idesktop"
 
-# ─── RDP session → Openbox ────────────────────────────────────────────────────
-RUN echo "exec openbox-session" > "/home/${KIOSK_USER}/.xsession" \
-    && chown "${KIOSK_USER}:${KIOSK_USER}" "/home/${KIOSK_USER}/.xsession" \
-    && chmod 0644 "/home/${KIOSK_USER}/.xsession"
+RUN echo "exec openbox-session" > "/home/${KIOSK_USER}-seed/.xsession" \
+    && chown "${KIOSK_USER}:${KIOSK_USER}" "/home/${KIOSK_USER}-seed/.xsession" \
+    && chmod 0644 "/home/${KIOSK_USER}-seed/.xsession"
 
-# ─── Openbox autostart: disable blanking, launch the app ─────────────────────
-RUN mkdir -p "/home/${KIOSK_USER}/.config/openbox"
+RUN mkdir -p "/home/${KIOSK_USER}-seed/.config/openbox"
 COPY --chown=${KIOSK_USER}:${KIOSK_USER} openbox-autostart \
-     /home/${KIOSK_USER}/.config/openbox/autostart
-RUN chmod 0755 "/home/${KIOSK_USER}/.config/openbox/autostart"
+     /home/${KIOSK_USER}-seed/.config/openbox/autostart
+RUN chmod 0755 "/home/${KIOSK_USER}-seed/.config/openbox/autostart"
 
 # ─── SSH: allow password auth, disable root login ────────────────────────────
 RUN sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config \

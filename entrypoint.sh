@@ -1,8 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+USER="${KIOSK_USER:-kioskuser}"
+HOME_DIR="/home/${USER}"
+
 # Set password at runtime so it is never baked into an image layer
-echo "${KIOSK_USER:-kioskuser}:${KIOSK_PASS:-changeme}" | chpasswd
+echo "${USER}:${KIOSK_PASS:-changeme}" | chpasswd
+
+# Seed the home directory from the image on first run.
+# The volume mounts over /home/$USER making it empty initially,
+# so we copy the baked-in files if they are missing.
+for f in HelloWorld.exe .xsession .config .idesktop; do
+    src="/home/${USER}-seed/${f}"
+    dst="${HOME_DIR}/${f}"
+    if [ -e "${src}" ] && [ ! -e "${dst}" ]; then
+        cp -a "${src}" "${dst}"
+        chown -R "${USER}:${USER}" "${dst}"
+    fi
+done
 
 # Generate SSH host keys if this is a fresh container (keys are not baked in)
 ssh-keygen -A
