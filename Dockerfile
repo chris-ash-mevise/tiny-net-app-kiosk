@@ -68,6 +68,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         \
         # DOSBox-X (requires trixie; not available in bookworm stable)
         dosbox-x \
+        \
+        # SSH server for file transfer (scp/sftp)
+        openssh-server \
     && rm -rf /var/lib/apt/lists/*
 
 # ─── Kiosk user (password set at runtime by entrypoint) ──────────────────────
@@ -107,6 +110,11 @@ COPY --chown=${KIOSK_USER}:${KIOSK_USER} openbox-autostart \
      /home/${KIOSK_USER}/.config/openbox/autostart
 RUN chmod 0755 "/home/${KIOSK_USER}/.config/openbox/autostart"
 
+# ─── SSH: allow password auth, disable root login ────────────────────────────
+RUN sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config \
+    && sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin no/'             /etc/ssh/sshd_config \
+    && sed -i 's/^#\?ChallengeResponseAuthentication.*/ChallengeResponseAuthentication no/' /etc/ssh/sshd_config
+
 # ─── Tune xrdp for low-resource / LAN use ────────────────────────────────────
 RUN sed -i 's/^crypt_level=.*/crypt_level=low/'  /etc/xrdp/xrdp.ini \
     && sed -i 's/^max_bpp=.*/max_bpp=16/'        /etc/xrdp/xrdp.ini
@@ -115,6 +123,6 @@ RUN sed -i 's/^crypt_level=.*/crypt_level=low/'  /etc/xrdp/xrdp.ini \
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 3389
+EXPOSE 3389 22
 
 ENTRYPOINT ["/entrypoint.sh"]

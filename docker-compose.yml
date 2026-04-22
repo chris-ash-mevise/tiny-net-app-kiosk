@@ -6,6 +6,7 @@ services:
         KIOSK_USER: kioskuser
     ports:
       - "3389:3389"
+      - "2222:22"
     env_file:
       - .env
     restart: unless-stopped
