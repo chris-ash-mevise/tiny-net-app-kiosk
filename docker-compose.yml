@@ -9,4 +9,9 @@ services:
       - "2222:22"
     env_file:
       - .env
+    volumes:
+      - kiosk-home:/home/kioskuser
     restart: unless-stopped
+
+volumes:
+  kiosk-home:
