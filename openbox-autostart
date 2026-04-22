@@ -1,0 +1,7 @@
+# Disable screen blanking and power management
+xset s off
+xset -dpms
+xset s noblank
+
+# Launch the kiosk app; session ends when the window closes
+mono ~/HelloWorld.exe

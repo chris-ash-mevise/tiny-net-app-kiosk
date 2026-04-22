@@ -1,0 +1,8 @@
+# Runtime secrets — copy .env.example to .env locally
+.env
+
+# Compiled Mono binary — built inside the Docker image
+*.exe
+
+# macOS
+.DS_Store

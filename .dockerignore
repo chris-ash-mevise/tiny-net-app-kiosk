@@ -1,0 +1,7 @@
+.env
+*.exe
+*.md
+setup-kiosk.sh
+.git
+.gitignore
+.DS_Store
