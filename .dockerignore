@@ -2,6 +2,9 @@
 *.exe
 *.md
 setup-kiosk.sh
+start.sh
+stop.sh
+restart.sh
 .git
 .gitignore
 .DS_Store
