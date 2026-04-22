@@ -1,7 +1,8 @@
 # ─── Stage 1: build ───────────────────────────────────────────────────────────
 # mono-complete + imagemagick are only needed here.
 # Neither is carried into the runtime image.
-FROM debian:12-slim AS build
+# Using trixie-slim to match the runtime base and satisfy dosbox-x deps.
+FROM debian:trixie-slim AS build
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         mono-complete \
@@ -33,13 +34,14 @@ RUN convert \
         /build/dosbox-icon.png
 
 # ─── Stage 2: runtime ─────────────────────────────────────────────────────────
-FROM debian:12-slim AS runtime
+# debian:trixie-slim is Debian 13 (testing) — required for dosbox-x and its
+# core library dependencies (libc6 >= 2.38, libstdc++6 >= 13).
+FROM debian:trixie-slim AS runtime
 
 ARG KIOSK_USER=kioskuser
 ENV KIOSK_USER=${KIOSK_USER}
 ENV KIOSK_PASS=changeme
 
-# ─── Stable packages ──────────────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
         \
         # Display / RDP stack
@@ -63,19 +65,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         # Lightweight terminal + process monitor
         xterm \
         procps \
-    && rm -rf /var/lib/apt/lists/*
-
-# ─── DOSBox-X from Debian trixie (not in bookworm stable) ────────────────────
-# Pin trixie at low priority so only the explicitly requested package
-# is pulled from testing; everything else stays on bookworm.
-RUN echo "deb http://deb.debian.org/debian trixie main" \
-        > /etc/apt/sources.list.d/trixie.list \
-    && printf 'Package: *\nPin: release n=trixie\nPin-Priority: 100\n\nPackage: dosbox-x\nPin: release n=trixie\nPin-Priority: 900\n' \
-        > /etc/apt/preferences.d/trixie \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends dosbox-x \
-    && rm /etc/apt/sources.list.d/trixie.list \
-    && rm /etc/apt/preferences.d/trixie \
+        \
+        # DOSBox-X (requires trixie; not available in bookworm stable)
+        dosbox-x \
     && rm -rf /var/lib/apt/lists/*
 
 # ─── Kiosk user (password set at runtime by entrypoint) ──────────────────────
