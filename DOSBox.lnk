@@ -1,0 +1,11 @@
+table Icon
+  Caption: DOSBox-X
+  Command: dosbox-x
+  Icon: /home/kioskuser/.idesktop/icons/dosbox-icon.png
+  X: 50
+  Y: 190
+  Width: 48
+  Height: 48
+  Transparency: 50
+  ClickDelay: 200
+end
